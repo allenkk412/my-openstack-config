@@ -9,7 +9,7 @@
 # mysql> GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' \
 #  IDENTIFIED BY 'GLANCE_DBPASS';
 # mysql> GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' \
-# IDENTIFIED BY 'GLANCE_DBPASS';
+#  IDENTIFIED BY 'GLANCE_DBPASS';
 
 . admin-openrc
 openstack user create --domain default glance --password 123
@@ -26,7 +26,7 @@ openstack endpoint create --region RegionOne \
   image admin http://controller:9292
 
 #### Install and configure components
-yum install openstack-glance
+yum install -y openstack-glance wget
 
 # 修改glance配置文件 /etc/glance/glance-api.conf
 cp /etc/glance/glance-api.conf /etc/glance/glance-api.conf.bk
@@ -98,3 +98,14 @@ su -s /bin/sh -c "glance-manage db_sync" glance
 systemctl enable openstack-glance-api.service openstack-glance-registry.service
 systemctl restart openstack-glance-api.service openstack-glance-registry.service
 systemctl status openstack-glance-api.service openstack-glance-registry.service
+
+# 验证glance安装
+. admin-openrc
+wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+
+openstack image create "cirros" \
+  --file cirros-0.3.4-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare \
+  --public
+
+openstack image list
